@@ -7,6 +7,7 @@ import os, requests
 
 # set working directory to where script is
 dataPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+os.makedirs(dataPath, exist_ok=True)
 os.chdir(dataPath)
 
 start = 57390680
