@@ -29,6 +29,7 @@ idEloRegex = re.compile(r'''
     (\d{1,4})        # ElO (1-4 digits number)
     ''', re.VERBOSE)
 
+# PlayerIDs and ELOs
 redInfo = idEloRegex.search(gameContent[1])
 blackInfo = idEloRegex.search(gameContent[2])
 
@@ -37,7 +38,19 @@ gameInfo['redELO'] = redInfo.group(5)
 gameInfo['blackID'] = blackInfo.group(3)
 gameInfo['blackELO'] = blackInfo.group(5)
 
-# TODO: record game result, datetime, event, number of moves?
+# Game Result
+resultRegex = re.compile(r'(\d{1}-\d{1})')
+gameResult = resultRegex.search(gameContent[3]).group(1)
+if gameResult == '1-0': 
+    gameInfo['winner'] = 'red'
+elif gameResult == '0-1':
+    gameInfo['winner'] = 'black'
+else:
+    gameInfo['winner'] = 'NA'
+
+# TODO: datetime, event
+
+# TODO: Save moves into a separate variable
 
 gameFile.close()
 
