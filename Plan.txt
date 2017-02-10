@@ -1,0 +1,9 @@
+sample: http://www.playok.com/zh/game.phtml/54337433.txt?xq
+
+1. download as many txt file as possible (starts with 50.. or 49000000)
+2. parse the text to get
+    TABLE 1: Game info
+ 0. website
+ a. player name (id)
+ b. player elo
+ 
