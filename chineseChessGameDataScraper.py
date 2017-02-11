@@ -10,7 +10,7 @@ dataPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 os.makedirs(dataPath, exist_ok=True)
 os.chdir(dataPath)
 
-start = 57390680
+start = 57380690
 end = 57390690
 
 gameList = list(range(start,end))
@@ -28,7 +28,7 @@ for gameID in gameList:
         gameFile.write(chunk)
         
     gameFile.close()
-
+    print('Parsed gameid ' + str(gameID))
 
 # TODO: Data wrangling option
 

@@ -10,20 +10,19 @@ dataPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 os.makedirs(dataPath, exist_ok=True)
 os.chdir(dataPath)
 
-# Load data as string
-# dataFileName = '57390689.txt'
 gameInfoData = []
+moveData = []
 
 for dataFileName in os.listdir('.'):
     gameFile = open(dataFileName)
     gameContent = gameFile.readlines()
-    # print(gameContent)
 
-    # Record game information
+    # Parse game information
+    # gameID
     currentGameInfo = {}
     currentGameInfo['gameID'] = dataFileName.split('.')[0]
 
-    # PlayerIDs and ELOs
+    # Parse playerIDs and ELOs
     idEloRegex = re.compile(r'''
         (\S+)            # color
         (\s+)            # spaces
@@ -39,8 +38,8 @@ for dataFileName in os.listdir('.'):
     currentGameInfo['blackID'] = blackInfo.group(3)
     currentGameInfo['blackELO'] = blackInfo.group(5)
 
-    # Game Result
-    resultRegex = re.compile(r'(\d{1}-\d{1})')
+    # Parse game result
+    resultRegex = re.compile(r'([01]-[01])')
     gameResult = resultRegex.search(gameContent[3]).group(1)
     if gameResult == '1-0': 
         currentGameInfo['winner'] = 'red'
@@ -48,9 +47,16 @@ for dataFileName in os.listdir('.'):
         currentGameInfo['winner'] = 'black'
     else:
         currentGameInfo['winner'] = 'NA'
-
+        
+    # Parse datetime
+    timeRegex = re.compile(r'(20\d{2}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})')
+    currentGameInfo['game_datetime'] = timeRegex.search(gameContent[4]).group(1)
+    
+    # Add to gameinfo list
+    gameInfoData.append(currentGameInfo)
+    
     # Parse game moves from line 7 and on, save into a separate variable
-    moveRegex = re.compile(r'(\w\d[\.+]\d)')
+    moveRegex = re.compile(r'(\w\d[\.+-=]\d)')
     gameMoves = []
     for moveString in gameContent[7:]:
         gameMoves += moveRegex.findall(moveString)
@@ -59,18 +65,45 @@ for dataFileName in os.listdir('.'):
     blackMoves = gameMoves[1:][::2]
     redMoves = gameMoves[::2]
 
-    # TODO: parse datetime
-
+    # Parse moves
+    movesData = []
+    for movenum in range(len(redMoves)):
+        currentMove = {}
+        currentMove['gameID'] = dataFileName.split('.')[0]
+        currentMove['movenum'] = movenum + 1
+        currentMove['side'] = 'red'
+        currentMove['move'] = redMoves[movenum]
+        moveData.append(currentMove)
+    
+    for movenum in range(len(blackMoves)):
+        currentMove = {}
+        currentMove['gameID'] = dataFileName.split('.')[0]
+        currentMove['movenum'] = movenum + 1
+        currentMove['side'] = 'black'
+        currentMove['move'] = blackMoves[movenum]
+        moveData.append(currentMove)
+    
     gameFile.close()
 
-    gameInfoData.append(currentGameInfo)
     
     # print(currentGameInfo)
+    
+
+    
     # print(blackMoves)
     # print(redMoves)
 
 # Save gameInfo into a dataframe
-gameInfo = pd.DataFrame(gameInfoData)[['gameID', 'blackID', 'blackELO', 'redID', 'redELO', 'winner']]
+gameInfo = pd.DataFrame(gameInfoData)[['gameID', 'game_datetime', 'blackID', 'blackELO', 'redID', 'redELO', 'winner']]
 print(gameInfo)
 
-# Save moveInfo into a dataframe
+# Save moves into a dataframe
+moves = pd.DataFrame(moveData)[['gameID','side','movenum','move']]
+print(moves)
+
+# Save dataframe into .csv
+csvPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data_csv')
+os.makedirs(csvPath, exist_ok=True)
+os.chdir(csvPath)
+gameInfo.to_csv('gameinfo.csv')
+moves.to_csv('moves.csv')
