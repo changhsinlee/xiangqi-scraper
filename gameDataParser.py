@@ -10,17 +10,17 @@ os.makedirs(dataPath, exist_ok=True)
 os.chdir(dataPath)
 
 # Load data as string
-dataFileName = '57390680.txt'
+dataFileName = '57390689.txt'
 
 gameFile = open(dataFileName)
 gameContent = gameFile.readlines()
 # print(gameContent)
 
-# Record player information: for each gameid, get red and black player id and elo
+# Record game information
 gameInfo = {}
 gameInfo['gameID'] = dataFileName.split('.')[0]
 
-# Find player information in the game
+# PlayerIDs and ELOs
 idEloRegex = re.compile(r'''
     (\S+)            # color
     (\s+)            # spaces
@@ -28,11 +28,9 @@ idEloRegex = re.compile(r'''
     ([^\d]+)         # not number
     (\d{1,4})        # ElO (1-4 digits number)
     ''', re.VERBOSE)
-
-# PlayerIDs and ELOs
+   
 redInfo = idEloRegex.search(gameContent[1])
 blackInfo = idEloRegex.search(gameContent[2])
-
 gameInfo['redID'] = redInfo.group(3)
 gameInfo['redELO'] = redInfo.group(5)
 gameInfo['blackID'] = blackInfo.group(3)
@@ -48,11 +46,20 @@ elif gameResult == '0-1':
 else:
     gameInfo['winner'] = 'NA'
 
-# TODO: datetime, event
+# Parse game moves from line 7 and on, save into a separate variable
+moveRegex = re.compile(r'(\w\d[\.+]\d)')
+gameMoves = []
+for moveString in gameContent[7:]:
+    gameMoves += moveRegex.findall(moveString)
 
-# TODO: Save moves into a separate variable
+# Split list into odd (black moves) and even (red moves)
+blackMoves = gameMoves[1:][::2]
+redMoves = gameMoves[::2]
+
+# TODO: parse datetime
 
 gameFile.close()
 
-print(gameInfo)
-
+# print(gameInfo)
+# print(blackMoves)
+# print(redMoves)
