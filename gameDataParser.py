@@ -16,6 +16,7 @@ moveData = []
 for dataFileName in os.listdir('.'):
     gameFile = open(dataFileName)
     gameContent = gameFile.readlines()
+    print(dataFileName)
 
     # Parse game information
     # gameID
@@ -39,12 +40,14 @@ for dataFileName in os.listdir('.'):
     currentGameInfo['blackELO'] = blackInfo.group(5)
 
     # Parse game result
-    resultRegex = re.compile(r'([01]-[01])')
+    resultRegex = re.compile(r'([01]-[01]|0\.5-0\.5)')
     gameResult = resultRegex.search(gameContent[3]).group(1)
     if gameResult == '1-0': 
         currentGameInfo['winner'] = 'red'
     elif gameResult == '0-1':
         currentGameInfo['winner'] = 'black'
+    elif gameResult == '0.5-0.5':
+        currentGameInfo['winner'] = 'tie'
     else:
         currentGameInfo['winner'] = 'NA'
         
@@ -70,7 +73,7 @@ for dataFileName in os.listdir('.'):
     for movenum in range(len(redMoves)):
         currentMove = {}
         currentMove['gameID'] = dataFileName.split('.')[0]
-        currentMove['movenum'] = movenum + 1
+        currentMove['turn'] = movenum + 1
         currentMove['side'] = 'red'
         currentMove['move'] = redMoves[movenum]
         moveData.append(currentMove)
@@ -78,32 +81,22 @@ for dataFileName in os.listdir('.'):
     for movenum in range(len(blackMoves)):
         currentMove = {}
         currentMove['gameID'] = dataFileName.split('.')[0]
-        currentMove['movenum'] = movenum + 1
+        currentMove['turn'] = movenum + 1
         currentMove['side'] = 'black'
         currentMove['move'] = blackMoves[movenum]
         moveData.append(currentMove)
     
     gameFile.close()
 
-    
-    # print(currentGameInfo)
-    
-
-    
-    # print(blackMoves)
-    # print(redMoves)
-
 # Save gameInfo into a dataframe
 gameInfo = pd.DataFrame(gameInfoData)[['gameID', 'game_datetime', 'blackID', 'blackELO', 'redID', 'redELO', 'winner']]
-print(gameInfo)
 
 # Save moves into a dataframe
-moves = pd.DataFrame(moveData)[['gameID','side','movenum','move']]
-print(moves)
+moves = pd.DataFrame(moveData)[['gameID','turn','side','move']]
 
 # Save dataframe into .csv
 csvPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data_csv')
 os.makedirs(csvPath, exist_ok=True)
 os.chdir(csvPath)
-gameInfo.to_csv('gameinfo.csv')
-moves.to_csv('moves.csv')
+gameInfo.to_csv('gameinfo.csv', index=False)
+moves.to_csv('moves.csv', index=False)
