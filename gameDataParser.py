@@ -47,7 +47,7 @@ for dataFileName in os.listdir('.'):
     elif gameResult == '0-1':
         currentGameInfo['winner'] = 'black'
     elif gameResult == '0.5-0.5':
-        currentGameInfo['winner'] = 'tie'
+        currentGameInfo['winner'] = 'draw'
     else:
         currentGameInfo['winner'] = 'NA'
         
@@ -59,12 +59,12 @@ for dataFileName in os.listdir('.'):
     gameInfoData.append(currentGameInfo)
     
     # Parse game moves from line 7 and on, save into a separate variable
-    moveRegex = re.compile(r'(\w\d[\.+-=]\d)')
+    moveRegex = re.compile(r'(\w[\d+-][\.+-=]\d)')
     gameMoves = []
     for moveString in gameContent[7:]:
         gameMoves += moveRegex.findall(moveString)
 
-    # Split list into odd (black moves) and even (red moves)
+    # Split list into odd (red moves) and even (black moves)
     blackMoves = gameMoves[1:][::2]
     redMoves = gameMoves[::2]
 
